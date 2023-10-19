@@ -7,6 +7,7 @@ import { getAveragePrice, getHighestPrice, getLowestPrice } from "../utils";
 import { log } from "console";
 import { User } from "@/types";
 import { generateEmailBody, sendEmail } from "../nodemailer";
+import { redirect } from "next/dist/server/api-utils";
 
 export async function scrapeAndStoreProduct(productUrl: string) {
   if (!productUrl) return;
@@ -30,7 +31,9 @@ export async function scrapeAndStoreProduct(productUrl: string) {
         ...scrapedProduct,
         priceHistory: updatedPriceHistory,
         lowestPrice: getLowestPrice(updatedPriceHistory),
-        highestPrice: getHighestPrice(updatedPriceHistory),
+        highestPrice:
+          getHighestPrice(updatedPriceHistory, scrapedProduct.originalPrice) ||
+          scrapedProduct.originalPrice,
         averagePrice: getAveragePrice(updatedPriceHistory),
       };
     }
@@ -42,6 +45,7 @@ export async function scrapeAndStoreProduct(productUrl: string) {
     );
 
     revalidatePath(`/products/${newProduct._id}`);
+    return;
   } catch (error: any) {
     throw new Error(`Failed to create/update product: ${error.message}`);
   }

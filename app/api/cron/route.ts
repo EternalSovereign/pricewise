@@ -42,7 +42,11 @@ export async function GET(request: Request) {
           ...scrapedProduct,
           priceHistory: updatedPriceHistory,
           lowestPrice: getLowestPrice(updatedPriceHistory),
-          highestPrice: getHighestPrice(updatedPriceHistory),
+          highestPrice:
+            getHighestPrice(
+              updatedPriceHistory,
+              scrapedProduct.originalPrice
+            ) || scrapedProduct.originalPrice,
           averagePrice: getAveragePrice(updatedPriceHistory),
         };
 
